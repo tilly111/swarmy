@@ -8,17 +8,16 @@
 Description:
 This module includes all perception possibilites of an agent.
 """
+
 # =============================================================================
 # Imports
 # =============================================================================
-import numpy as np
 import pygame
-import math
+
 # =============================================================================
 # Class
 # =============================================================================
 class Perception():
-    pass
     """
     The perception object represents the all sensing capabilites of an agent.
     All sensors will be defined here. 
@@ -27,168 +26,302 @@ class Perception():
         a (agent.py): instance of the agent    
     
     Available sensors:
-        Your light sensor
+        Collision sensor:       Detects collisions with objects or other agents.
+        Source sensor:          Detects sources where tokens can be collected.
+        Sink sensor:            Detects sinks where tokens can be discarded.
+        Time-of-Flight sensor:  Measures the distance in front the agent to the next object in the environment. The sensor is available as a 1D or 2D sensor.
     
     """
-    def __init__(self, a, e):
-        
+    def __init__(self, a):
         """
         Initialize perception object.
         """    
 
+        # constants
+        self.TOF_MAX = 1000                # choose even number
+
         # variables        
         self.agent = a
-        self.env = e
-
-        self.resolution = 1
-        self.range = 70
-
-        # TODO make dynamic
-        self.light_souce_x = self.env.width / 2
-        self.light_souce_y = self.env.height / 2
-
-
-    # returns between 1 and 0
-    def light_sensor(self):
-        r_pos = self.agent.actuation.position  # x = 0, y = 0
-        r_ori = - self.agent.actuation.angle + 90
-        # make 5 units apart
-        x_sens = np.array([0, 0])  # left right?
-        y_sens = np.array([10, -10])
-        # rotate
-        x_sens_rot = x_sens * np.cos(np.deg2rad(r_ori)) - y_sens * np.sin(np.deg2rad(r_ori))
-        y_sens_rot = x_sens * np.sin(np.deg2rad(r_ori)) + y_sens * np.cos(np.deg2rad(r_ori))
-        # translate
-        x_sens_fin = x_sens_rot + r_pos[0]
-        y_sens_fin = y_sens_rot + r_pos[1]
-
-        dis_l = np.sqrt((x_sens_fin[0] - self.light_souce_x)**2 + (y_sens_fin[0] - self.light_souce_y)**2)
-        dis_r = np.sqrt((x_sens_fin[1] - self.light_souce_x) ** 2 + (y_sens_fin[1] - self.light_souce_y) ** 2)
-        return [1 - (dis_l / 1415), 1 - (dis_r / 1415)]
-
-
-    def proximity_sensor(self):
+        self.otherAgentRects = []
+        self.obstacleRects = []    
+       
+        # important to initially calculate collisions when instatiating the agents
+        self.helperOAO()
+        
+    def collisionSensor(self):
         """
-        Returns a value between [0...1] depending on the distance of the obstacle
+        Collision sensor returns true when a collision with the bounding rectangle is detected
+        
+        Returns:
+            collisionObserved (boolean): True = collision, False = no collision 
         """
-        robot_pos = self.agent.actuation.position
-        robot_ori = - self.agent.actuation.angle + 90
-
-        # generate rays
-        ray_x = np.arange(30, 30+self.range, self.resolution, dtype=int)
-        ray_y = np.arange(30, 30+self.range, self.resolution, dtype=int) * 0
-
-        # print("rayx", ray_x)
-        # print("rayy", ray_y)
-
-        # rotate rays
-        # x′ = x * cos(θ) - y * sin(θ)
-        # y′ = x * sin(θ) + y * cos(θ)
-        ray_x_rot = ray_x * np.cos(np.deg2rad(robot_ori)) - ray_y * np.sin(np.deg2rad(robot_ori))
-        ray_y_rot = ray_x * np.sin(np.deg2rad(robot_ori)) + ray_y * np.cos(np.deg2rad(robot_ori))
-
-        # sensor left
-        ray_x_rot1 = ray_x * np.cos(np.deg2rad(robot_ori-45)) - ray_y * np.sin(np.deg2rad(robot_ori-45))
-        ray_y_rot1 = ray_x * np.sin(np.deg2rad(robot_ori-45)) + ray_y * np.cos(np.deg2rad(robot_ori-45))
-
-        # sensor right
-        ray_x_rot2 = ray_x * np.cos(np.deg2rad(robot_ori+45)) - ray_y * np.sin(np.deg2rad(robot_ori+45))
-        ray_y_rot2 = ray_x * np.sin(np.deg2rad(robot_ori+45)) + ray_y * np.cos(np.deg2rad(robot_ori+45))
-
-        # translate rays
-        ray_x_fin = ray_x_rot + robot_pos[0]
-        ray_y_fin = ray_y_rot + robot_pos[1]
-
-        ray_x_fin1 = ray_x_rot1 + robot_pos[0]
-        ray_y_fin1 = ray_y_rot1 + robot_pos[1]
-
-        ray_x_fin2 = ray_x_rot2 + robot_pos[0]
-        ray_y_fin2 = ray_y_rot2 + robot_pos[1]
-
-        # append for rendering
-        ray_render = [ray_x_fin[0], ray_y_fin[0], ray_x_fin[-1], ray_y_fin[-1]]
-        self.env.sensor_rays.append(ray_render)
-        ray_render = [ray_x_fin1[0], ray_y_fin1[0], ray_x_fin1[-1], ray_y_fin1[-1]]
-        self.env.sensor_rays.append(ray_render)
-        ray_render = [ray_x_fin2[0], ray_y_fin2[0], ray_x_fin2[-1], ray_y_fin2[-1]]
-        self.env.sensor_rays.append(ray_render)
-
-        # for obstacles
-        vals = [0.0, 0.0, 0.0]
-        for i in range(len(self.env.staticRectList)):
-            # print("obj", type(self.env.staticRectList[i][1]))
-            # go along the ray
-            for j in range(self.range):
-                if self.env.staticRectList[i][1].collidepoint(int(ray_x_fin1[j]), int(ray_y_fin1[j])) and vals[0] == 0.0:
-                    vals[0] = (self.range - j) / self.range
-                if self.env.staticRectList[i][1].collidepoint(int(ray_x_fin[j]), int(ray_y_fin[j])) and vals[1] == 0.0:
-                    vals[1] = (self.range - j) / self.range
-                if self.env.staticRectList[i][1].collidepoint(int(ray_x_fin2[j]), int(ray_y_fin2[j])) and vals[2] == 0.0:
-                    vals[2] = (self.range - j) / self.range
-
-        # check for moving obstacles aka other agents
-        # print(f"[{self.agent.agent_id}] length of list {len(self.env.dynamicObstacles)}")
-        vals_dyn = [0.0, 0.0, 0.0]
-        for i in range(len(self.env.dynamicObstacles)):
-            # go along the ray
-            if self.env.dynamicObstacles[i] == self.agent.body.rect:
-                # do not check yourself
-                continue
-
-            for j in range(self.range):
-                if self.env.dynamicObstacles[i].collidepoint(int(ray_x_fin1[j]), int(ray_y_fin1[j])) and vals_dyn[0] == 0.0:
-                    vals_dyn[0] = (self.range - j) / self.range
-                if self.env.dynamicObstacles[i].collidepoint(int(ray_x_fin[j]), int(ray_y_fin[j])) and vals_dyn[1] == 0.0:
-                    vals_dyn[1] = (self.range - j) / self.range
-                if self.env.dynamicObstacles[i].collidepoint(int(ray_x_fin2[j]), int(ray_y_fin2[j])) and vals_dyn[2] == 0.0:
-                    vals_dyn[2] = (self.range - j) / self.range
-
-
-        # return np.maximum(vals, vals_dyn)
-        return [vals, vals_dyn]
-
-
-    # sensor which returns true if a item is in reach and not picked up already
-    # returns False otherwise
-    def item_sensor(self):
-        # get the item density
-        # sum(1 - normalized_distance * 1/n)
-        n = len(self.env.dynamicItems)
-        dens = 0
-        for item in self.env.dynamicItems:
-            if (np.sqrt((self.agent.body.rect.centerx - item.rect.centerx) ** 2 + (
-                        self.agent.body.rect.centery - item.rect.centery) ** 2) / 1414.2) < 0.3:
-                dens += 1
-        #     dens += 1 - (np.sqrt((self.agent.body.rect.centerx - item.rect.centerx) ** 2 + (
-        #                 self.agent.body.rect.centery - item.rect.centery) ** 2) / 1414.2)
-        dens /= n
-
-        # find the next item
-        for item in self.env.dynamicItems:
-            if np.sqrt((self.agent.body.rect.centerx - item.rect.centerx)**2 + (self.agent.body.rect.centery - item.rect.centery)**2) < item.radius + 15:  # if in range
-                if not item.picked_up:  # item is not picked up
-                    return [True, item, dens]
-        return [False, None, dens]
-
-
-    def bumper_sensor(self):
-        objects_to_push = []
-
-        r_ori = self.agent.actuation.angle - 90
-
-
-        for item in self.env.dynamicItems:
-            if np.sqrt((self.agent.body.rect.centerx - item.rect.centerx) ** 2 + (
-                    self.agent.body.rect.centery - item.rect.centery) ** 2) < item.radius + 30:  # if in range
-
-                obj_ori = np.rad2deg(np.arctan2(-(item.rect.centery - self.agent.body.rect.centery),
-                                                item.rect.centerx - self.agent.body.rect.centerx))
-
-                if np.abs(r_ori - obj_ori) < 80 or np.abs(r_ori - obj_ori) > 280:  # calcualte angle of object
-                    objects_to_push.append(item)
-
-        return objects_to_push
-
+        agentRect = self.agent.body.rect
+        testbedWidth = self.agent.environment.width
+        testbedHeight = self.agent.environment.height
+        
+        collisionObserved = False
+        
+        # check collision with the testbed wall
+        if(agentRect.left <= 0 or agentRect.right >= testbedWidth or agentRect.top <= 0 or agentRect.bottom >= testbedHeight):
+            collisionObserved = True
+        
+        # check collision with an obstacle
+        elif(self.agent.body.rect.collidelistall(self.obstacleRects)):
+            collisionObserved = True
+        
+        # check collision due to other agents
+        elif(self.agent.body.rect.collidelistall(self.otherAgentRects)):
+            collisionObserved = True
+            
+        return collisionObserved
  
 
+    def sourceSensor(self):
+        """
+        Sensor can detect a source from which a token can be taken
+        
+        Returns:
+            tokenDetected (boolean): True = token detected, False = no token 
+            affectedSource (source)
+        """
+        tokenDetected = False
+        affectedSource = None
+        
+        self.agent.processing.state["source detected"] = 0
+        self.agent.processing.state["token detected"] = 0      
+        
+        # iterate through all possible sources
+        for source in self.agent.sources:
+            # check if the source has tokens left and if the agent is in contact with the source
+            if(self.agent.body.rect.colliderect(source)):
+                self.agent.processing.state["source detected"] = 1            
+                if(source.getNumberOfTokens() > 0):
+                    self.agent.processing.state["token detected"] = 1  
+                    tokenDetected = True
+                    affectedSource = source
+                                                    
+        return tokenDetected, affectedSource
+        
+    
+    def sinkSensor(self):
+        """
+        Sensor can detect a sink in which a token can be placed
+        
+        Returns:
+            sinkDetected (boolean): True = sink detected, False = no sink 
+            affectedSink (source)
+        """
+        sinkDetected = False
+        affectedSink = None
+        
+        # iterate through all possible sources
+        for sink in self.agent.sinks:
+            if(self.agent.body.rect.colliderect(sink)):
+                self.agent.processing.state["sink detected"] = 1  
+                sinkDetected = True
+                affectedSink = sink
+            else:
+                self.agent.processing.state["sink detected"] = 0  
+                
+        return sinkDetected, affectedSink
+         
+
+    def tofLaserSensor1D(self):
+        """
+        Measure the distance in one dimension.
+    
+        Args:
+            rendering (boolean): visualize sensor if true
+    
+        Returns:
+            distance (int): distance in mm     
+        """
+        
+        # helper list to identify shortest distance to objects
+        currDistance = self.TOF_MAX  # start with max distance
+        collisionPoint = pygame.Vector2()
+        
+        # ---------------------
+        # start point of ToF-Sensor
+        v = pygame.Vector2()
+        v.x = self.agent.actuation.position[0] + self.agent.actuation.direction[0]*self.agent.body.HEIGHT/2
+        v.y = self.agent.actuation.position[1] + self.agent.actuation.direction[1]*self.agent.body.HEIGHT/2
+        
+        # end point of ToF-Sensor
+        v2 = pygame.Vector2()
+        v2.x = self.agent.actuation.position[0] + self.agent.actuation.direction[0]*(self.TOF_MAX+self.agent.body.HEIGHT/2)
+        v2.y = self.agent.actuation.position[1] + self.agent.actuation.direction[1]*(self.TOF_MAX+self.agent.body.HEIGHT/2)
+        
+        
+        # calculate the distance to obstacles and add results to list
+        for o in self.agent.obstacles:
+            x = o.rect.clipline(v.x, v.y, v2.x, v2.y)
+            if(x): # if a collision detected
+                d = v.distance_to(x[0])
+                if(d < currDistance):
+                    currDistance = d
+                    collisionPoint = x[0]
+        
+        # calculate the distance to other agents and add results to list
+        for agent in self.agent.agents:
+            x = agent.body.rect.clipline(v.x, v.y, v2.x, v2.y)
+            if(self.agent.ID != agent.ID and x): # if a collision detected
+                d = v.distance_to(x[0])
+                if(d < currDistance):
+                    currDistance = d
+                    collisionPoint = x[0]                
+                
+        for w in self.agent.environment.wall:
+            x = w.clipline(v.x, v.y, v2.x, v2.y)
+            if(x): # if a collision detected
+                d = v.distance_to(x[0])
+                if(d < currDistance):
+                    currDistance = d
+                    collisionPoint = x[0]              
+         
+                
+        # visualize ToF-Laser for testing
+        rendering = False
+        if (rendering == True):
+            if(currDistance < self.TOF_MAX):
+                self.agent.environment.dynamicLineList.append(["RED", v, collisionPoint])
+            else:
+                self.agent.environment.dynamicLineList.append(["BLUE", v, v2])
        
+            
+        currDistance = round(currDistance)    
+        #print(currDistance) 
+        
+        return currDistance
+
+
+    def tofLaserSensor2D(self):
+        """
+        Measure the distance in one dimension.
+    
+        Args:
+            rendering (boolean): visualize sensor if true
+    
+        Returns:
+            distance (int): distance in mm
+        """
+        
+        # helper list to identify shortest distance to objects
+        currDistance = self.TOF_MAX  # start with max distance
+        currDistance2 = self.TOF_MAX  # start with max distance
+        collisionPoint = pygame.Vector2()
+        collisionPoint2 = pygame.Vector2()
+
+        # start point of ToF-Sensor
+        # vector perpedicular to direction
+
+
+        v = pygame.Vector2()
+        v.x = self.agent.actuation.position[0] + self.agent.actuation.direction[0]*self.agent.body.HEIGHT/2 + -self.agent.actuation.direction[1]*5
+        v.y = self.agent.actuation.position[1] + self.agent.actuation.direction[1]*self.agent.body.HEIGHT/2 + self.agent.actuation.direction[0]*5
+        
+        v2 = pygame.Vector2()
+        v2.x = self.agent.actuation.position[0] + self.agent.actuation.direction[0]*(self.TOF_MAX+self.agent.body.HEIGHT/2) + -self.agent.actuation.direction[1]*5
+        v2.y = self.agent.actuation.position[1] + self.agent.actuation.direction[1]*(self.TOF_MAX+self.agent.body.HEIGHT/2) + self.agent.actuation.direction[0]*5
+
+        w = pygame.Vector2()
+        w.x = self.agent.actuation.position[0] + self.agent.actuation.direction[0]*self.agent.body.HEIGHT/2 + self.agent.actuation.direction[1]*5
+        w.y = self.agent.actuation.position[1] + self.agent.actuation.direction[1]*self.agent.body.HEIGHT/2 + -self.agent.actuation.direction[0]*5
+        
+        w2 = pygame.Vector2()
+        w2.x = self.agent.actuation.position[0] + self.agent.actuation.direction[0]*(self.TOF_MAX+self.agent.body.HEIGHT/2) + self.agent.actuation.direction[1]*5
+        w2.y = self.agent.actuation.position[1] + self.agent.actuation.direction[1]*(self.TOF_MAX+self.agent.body.HEIGHT/2) + -self.agent.actuation.direction[0]*5
+        
+        
+        
+        # calculate the distance to obstacles and add results to list
+        for o in self.agent.obstacles:
+            x = o.rect.clipline(v.x, v.y, v2.x, v2.y)
+            x2 = o.rect.clipline(w.x, w.y, w2.x, w2.y)
+            
+            if(x): # if a collision detected
+                d = v.distance_to(x[0])
+                if(d < currDistance):
+                    currDistance = d
+                    collisionPoint = x[0]
+            
+            if(x2): # if a collision2 detected
+                d2 = w.distance_to(x2[0])
+                if(d2 < currDistance2):
+                    currDistance2 = d2
+                    collisionPoint2 = x2[0]
+                    
+        # calculate the distance to other agents and add results to list
+        for agent in self.agent.agents:
+            x = agent.body.rect.clipline(v.x, v.y, v2.x, v2.y)
+            x2 = agent.body.rect.clipline(w.x, w.y, w2.x, w2.y)
+            if(self.agent.ID != agent.ID):
+                if(x): # if a collision detected
+                    d = v.distance_to(x[0])
+                    if(d < currDistance):
+                        currDistance = d
+                        collisionPoint = x[0]                
+                if(x2): # if a collision detected
+                    d2 = w.distance_to(x2[0])
+                    if(d2 < currDistance2):
+                        currDistance2 = d2
+                        collisionPoint2 = x2[0] 
+                        
+        for wall in self.agent.environment.wall:
+            x = wall.clipline(v.x, v.y, v2.x, v2.y)
+            x2 = wall.clipline(w.x, w.y, w2.x, w2.y)
+            if(x): # if a collision detected
+                d = v.distance_to(x[0])
+                if(d < currDistance):
+                    currDistance = d
+                    collisionPoint = x[0]              
+
+            if(x2): # if a collision detected
+                d2 = w.distance_to(x2[0])
+                if(d2 < currDistance2):
+                    currDistance2 = d2
+                    collisionPoint2 = x2[0] 
+                    
+        # visualize ToF-Laser for testing
+        rendering = False        
+        if (rendering == True):
+            if(currDistance < self.TOF_MAX):
+                self.agent.environment.dynamicLineList.append(["RED", v, collisionPoint])
+            else:
+                self.agent.environment.dynamicLineList.append(["BLUE", v, v2])
+                
+            if(currDistance2 < self.TOF_MAX):
+                self.agent.environment.dynamicLineList.append(["RED", w, collisionPoint2])
+            else:
+                self.agent.environment.dynamicLineList.append(["BLUE", w, w2])    
+            
+        currDistance = round(currDistance)    
+        currDistance2 = round(currDistance2)    
+                
+        #print("L1: " + str(currDistance) + " L2: " + str(currDistance2)) 
+            
+        return round(currDistance), currDistance2
+    
+    
+#%% Helper functions
+    
+    def helperOAO(self): 
+        """
+        Helper function to avoid redundant calculation of other agents and obstacles-
+        Store once other agents and obstacles.
+        Needed e.g. for sensors and communication.
+        """              
+        
+        # reset pre calculated other agents and obstacles to avoid multiple representations
+        self.otherAgentRects = []
+        self.obstacleRects = []  
+        
+        # other agents
+        for agent in self.agent.agents:
+            if(self.agent.ID != agent.ID):
+                self.otherAgentRects.append(agent.body.rect)
+                
+        # obstacles agents                
+        for obstacle in self.agent.obstacles:
+            self.obstacleRects.append(obstacle.rect)
+        

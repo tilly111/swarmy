@@ -17,7 +17,7 @@ import math
 import numpy as np
 
 # Helper variable
-polyRotatedLookUp = []  # the table reduces computation steps to improves rendering speed
+polyRotatedLookUp = [] # the table reduces computation steps to improves rendering speed
 
 # =============================================================================
 # Class
@@ -31,7 +31,7 @@ class Body():
         a (agent.py): instance of the agent
         p ([int, int]): initial center position
     """
-    def __init__(self, a, p, controller):
+    def __init__(self, a, p):
         """
         Initialize body object.
         """    
@@ -40,10 +40,8 @@ class Body():
         # constants
         self.WIDTH = 24                 # agent body width
         self.HEIGHT = 10                # agent body height
-        if controller == "collecting_anti_agent":
-            self.COLOR = (90, 0, 0)
-        else:
-            self.COLOR = (0, 90, 90)          # turquoise
+        self.COLOR = (0,90,90)          # turquoise
+        self.TOKEN_COLOR = (181,111,0)  # orange 
         self.BOUNDING = round(np.hypot(self.WIDTH, self.HEIGHT))+20
         
         # variables
@@ -97,10 +95,6 @@ class Body():
             self.polyCur.append(p + self.agent.actuation.position)
         self.agent.environment.dynamicPolyList.append([self.COLOR, self.polyCur, 3])
 
-        self.rect.centerx = self.agent.actuation.position[0]
-        self.rect.centery = self.agent.actuation.position[1]
-        self.agent.environment.dynamicObstacles.append(self.rect)
-
         # --- Old Approach without lookup table ---
         # rotate polygon according to current angle and add position vector
         # ang = math.radians(self.agent.actuation.angle)
@@ -113,8 +107,8 @@ class Body():
         # self.agent.environment.dynamicRectList.append([self.COLOR, self.rect, 3]) 
         
         # update token visualization
-        ##if(self.agent.nesting.communication.tokens): # if agent carries a token
-        ##    self.agent.environment.dynamicCircList.append([self.TOKEN_COLOR, self.agent.actuation.position, 3, 10])      
+        if(self.agent.nesting.communication.tokens): # if agent carries a token
+            self.agent.environment.dynamicCircList.append([self.TOKEN_COLOR, self.agent.actuation.position, 3, 10])      
 
 
     def helperLUT(self):
@@ -132,4 +126,3 @@ class Body():
             for p in self.polyRef:
                 self.polyCur.append(np.matmul(p,turnMat) + ([int(0), int(0)]))
             polyRotatedLookUp.append(self.polyCur)
-            

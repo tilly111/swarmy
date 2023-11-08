@@ -12,7 +12,7 @@ This module represents the physical environment.
 # Imports
 # =============================================================================
 import pygame
-from swarmy.item import Item
+
 # =============================================================================
 # Class
 # =============================================================================
@@ -34,8 +34,8 @@ class Environment():
         # Variables and constants - set screws
         self.FPS = 60  # Frames per second. A typical value is 60 frames per second
         self.BACKGROUND_COLOR = (255, 255, 255)    
-        self.width = 1000  #pygame.display.Info().current_w
-        self.height = 1000  #pygame.display.Info().current_h
+        self.width = pygame.display.Info().current_w    # testbed width  // self.width = 500
+        self.height = pygame.display.Info().current_h   # testbed height // self.height = 300
         
         # init basic rendering surface
         if(rendering == 1):
@@ -48,20 +48,23 @@ class Environment():
         elif(rendering == 0):
             self.displaySurface = pygame.display.set_mode((self.width, self.height), pygame.NOFRAME)                # black screen where capture images is possible
 
-        # use the space below to add structures like walls or obstacles, e.g. via the function pygame.Rect
-        self.structure = []
+        
+        # add wall
+        self.wall = []
+        wallWidth = 3
+        self.wall.append(pygame.Rect(0, 0, self.width, wallWidth))
+        self.wall.append(pygame.Rect(0, 0, wallWidth, self.height))
+        self.wall.append(pygame.Rect(0, self.height-wallWidth, self.width, wallWidth))
+        self.wall.append(pygame.Rect(self.width-wallWidth, 0, wallWidth, self.height))
+        
         # list with objects to be plotted
         self.staticRectList = []
         self.staticCircList = []
-
-        self.staticVisitedList = []
-
-        self.sensor_rays = []
         
+        self.dynamicCircList = [] # filled circle
+        self.dynamicRectList = []
         self.dynamicPolyList = []
-
-        self.dynamicObstacles = []  # body of the robots
-        self.dynamicItems = []
+        self.dynamicLineList = []
 
         self.clock = pygame.time.Clock()  # create an object to help track time
 
@@ -73,30 +76,36 @@ class Environment():
         This method is used to update the whole environment.
         """     
         self.displaySurface.fill(self.BACKGROUND_COLOR) 
-
+                
         # draw static rects (items = sources, sinks, obstacles)
         for x in self.staticRectList:
-            pygame.draw.rect(self.displaySurface, x[0], x[1], x[2])
+            pygame.draw.rect(self.displaySurface, x[0], x[1], x[2])   
 
-        # draw visited things TODO does this makes sense??
-        for x in self.staticVisitedList:
-            pygame.draw.rect(self.displaySurface, x[0], x[1], x[2])
+        # draw static circles (source and sink tokens)
+        for x in self.staticCircList:
+            pygame.draw.circle(self.displaySurface, x[0], x[1], x[2])
+
+        # draw walls (environment border)     
+        for x in self.wall:
+            pygame.draw.rect(self.displaySurface, "BLACK", x)   
                       
         # draw dynamic polygons (agents)
         for x in self.dynamicPolyList:
-            pygame.draw.polygon(self.displaySurface, (255,255,255), x[1])  # fill the polygon
+            pygame.draw.polygon(self.displaySurface, (255,255,255), x[1]) # fill the polygon
             pygame.draw.polygon(self.displaySurface, x[0], x[1], 3)
+            #pygame.draw.aalines(self.displaySurface, x[0], True, x[1])   
+            
+        # draw dynamic circles (agent tokens)
+        for x in self.dynamicCircList:
+            pygame.draw.circle(self.displaySurface, x[0], x[1], x[2], x[3])
 
-        for x in self.dynamicObstacles:
-            pygame.draw.rect(self.displaySurface, (255, 0, 0), x, 3)
+        # draw rectangles
+        for x in self.dynamicRectList:
+            pygame.draw.rect(self.displaySurface, x[0], x[1], x[2])   
 
-        for x in self.dynamicItems:
-            pygame.draw.circle(self.displaySurface, x.color, (x.rect.centerx, x.rect.centery), x.radius, 0)
+        for x in self.dynamicLineList:
+            pygame.draw.line(self.displaySurface, x[0], x[1], x[2])
 
-        # TODO make dynamic draw rays
-        for r in self.sensor_rays:
-            pygame.draw.line(self.displaySurface, (255, 0, 0), pygame.Vector2(r[0], r[1]), pygame.Vector2(r[2], r[3]))
-        self.sensor_rays.clear()
         # reset dynamic buffers
         self.resetDynamicBuffers()                  
 
@@ -104,14 +113,18 @@ class Environment():
         pygame.display.flip()                       
         self.forceFramerate()       
 
+       
     def resetDynamicBuffers(self):
         self.dynamicCircList = []
+        self.dynamicRectList = []
         self.dynamicPolyList = []
-
-    def resetDynamicObstacles(self):
-        self.dynamicObstacles = []
-        self.dynamicItems = []
+        self.dynamicLineList = []
             
+    def getDisplay(self):
+        """
+        Get current display (window).
+        """     
+        return self.displaySurface
 
     def forceFramerate(self):
         """
@@ -120,3 +133,15 @@ class Environment():
         """
         self.clock.tick(self.FPS)  # every second at most fps frames should pass.
         #self.clock.tick_busy_loop(fps)  # more accurate to ensure fps than tick but need more CPU computation power
+
+    def printFPS(self):
+        """
+        Compute frames per second by averaging the last ten Clock.tick()
+        """
+        print("\n------------------------------------")    
+        print("Frames per second: " + str(self.clock.get_fps()))
+        
+        
+        
+        
+        

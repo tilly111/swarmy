@@ -14,7 +14,9 @@ The module represents the motion capabilites of an agent.
 # =============================================================================
 import math
 import pygame
+from abc import abstractmethod
 import numpy as np
+import yaml
 # =============================================================================
 # Class
 # =============================================================================
@@ -31,80 +33,70 @@ class Actuation():
         p ([int, int]): center position
         d (int): initial angle (direction)    
     """
-    def __init__(self, g, p, d):
+    def __init__(self, g):
         """
         Initialize actuation object.
         """    
         # constants
-        self.LINEAR_VELOCITY = 4                # choose even number
-        self.ANGLE_VELOCITY = 6                 # choose even number
 
         # variables
         self.agent = g                  # parent python module
-        self.position = p
-        self.angle = (d + 90) % 360     # intial position is 90 degrees
-        self.direction = [math.sin(math.radians(self.angle)), math.cos(math.radians(self.angle))]  # unit vector showing the direction
-                              
-    def stepForward(self):
+        self.position = [0,0]
+        self.angle  = 0
+        self.direction = [0,0]          # unit vector showing the direction
+
+        with open('config.yaml', 'r') as file:
+            self.config = yaml.load(file, Loader=yaml.FullLoader)
+            
+    @abstractmethod
+    def torus(self):
+        print('Torus not implemented')
+
+    @abstractmethod
+    def controller(self):
+        print('Controller not implemented')
+
+    def stepForward(self, velocity):
         """
         One step forward.
         """
+
         # calculate the position from the direction and speed and update body position
-        self.position[0] += self.direction[0]*self.LINEAR_VELOCITY
-        self.position[1] += self.direction[1]*self.LINEAR_VELOCITY
-        self.agent.body.rect.centerx = self.position[0]
-        self.agent.body.rect.centery = self.position[1]
-    
-    
-    def stepBackward(self):
+        robot_position_x, robot_position_y, robot_heading = self.agent.get_position()
+
+        direction_x = math.sin(math.radians(robot_heading))
+        direction_y = math.cos(math.radians(robot_heading))
+
+        new_position_x = float(robot_position_x + direction_x * velocity)
+        new_position_y = float(robot_position_y + direction_y * velocity)
+
+        self.agent.set_position(new_position_x, new_position_y, robot_heading)
+
+    def stepBackward(self,velocity):
         """
         One step backward.
         """
-        # calculate the position from the direction and speed and update body position
-        self.position[0] -= self.direction[0]*self.LINEAR_VELOCITY
-        self.position[1] -= self.direction[1]*self.LINEAR_VELOCITY
-        self.agent.body.rect.centerx = self.position[0]
-        self.agent.body.rect.centery = self.position[1]
+        robot_position_x, robot_position_y, robot_heading = self.agent.get_position()
 
+        direction_x = math.sin(math.radians(robot_heading))
+        direction_y = math.cos(math.radians(robot_heading))
+        new_position_x = robot_position_x - direction_x * velocity
+        new_position_y = robot_position_y - direction_y * velocity
 
-    def turnLeft(self):
-        """
-        turns left.
-        """
+        self.agent.set_position(new_position_x, new_position_y, robot_heading)
+
+    def turn_right(self, angle_velocity):
+
+        robot_position_x, robot_position_y, robot_heading = self.agent.get_position()
+        new_angle = (robot_heading - angle_velocity) % 360
+        self.agent.set_position(robot_position_x, robot_position_y, new_angle)
+
+    def turn_left(self,angle_velocity):
         # new angle
-        self.angle = (self.angle + self.ANGLE_VELOCITY) % 360
+        robot_position_x, robot_position_y, robot_heading = self.agent.get_position()
+        new_angle = (robot_heading + angle_velocity) % 360
+        self.agent.set_position(robot_position_x, robot_position_y, new_angle)
 
-        # calculate the direction from the angle variable
-        self.direction[0] = math.sin(math.radians(self.angle))
-        self.direction[1] = math.cos(math.radians(self.angle))
-
-
-    def turnRight(self):
-        """
-        Turns right.
-        """
-        # new angle
-        self.angle = (self.angle - self.ANGLE_VELOCITY) % 360
-
-        # calculate the direction from the angle variable
-        self.direction[0] = math.sin(math.radians(self.angle))
-        self.direction[1] = math.cos(math.radians(self.angle))
-
-
-    def turnRightForward(self):
-        self.turnRight()
-        self.stepForward()
-
-
-    def turnLeftForward(self):
-        self.turnLeft()
-        self.stepForward()
-
-
-    def wait(self):
-        self.agent.body.rect.centerx = self.position[0]
-        self.agent.body.rect.centery = self.position[1]
-        
 #%% Helper functions
         
     def processUserInput(self, pressedKeys):
@@ -116,24 +108,15 @@ class Actuation():
         
         """
         if pressedKeys[pygame.K_UP]:           
-            self.stepForward()
+            self.stepForward(self.config['default_velocity'])
             
         if pressedKeys[pygame.K_DOWN]:
-            self.stepBackward()
+            self.stepBackward(self.config['default_velocity'])
             
         if pressedKeys[pygame.K_LEFT]:
             # new angle
-            self.angle = (self.angle + self.ANGLE_VELOCITY) % 360
-                    
-            # calculate the direction from the angle variable
-            self.direction[0] = math.sin(math.radians(self.angle))
-            self.direction[1] = math.cos(math.radians(self.angle))         
+            self.turn_left(self.config['default_angle_velocity'])
             
         if pressedKeys[pygame.K_RIGHT]:          
-            # new angle
-            self.angle = (self.angle - self.ANGLE_VELOCITY) % 360
-
-            # calculate the direction from the angle variable
-            self.direction[0] = math.sin(math.radians(self.angle))
-            self.direction[1] = math.cos(math.radians(self.angle))
+            self.turn_right(self.config['default_angle_velocity'])
             

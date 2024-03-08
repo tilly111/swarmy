@@ -18,9 +18,24 @@ This module is the workspace for the simulation environment where:
 # %% Experiment: Testing
 
 import os
+import yaml
 from swarmy.experiment import Experiment
 
+with open ('config.yaml', 'r') as file:
+    config = yaml.load(file, Loader=yaml.FullLoader)
 
-exp1 = Experiment()
+### import your controller and sensors
+from controller.fear import Fear
+from controller.aggressive import Aggressive
+from controller.my_controller import MyController
+from Sensors.my_sensors import MySensor
+from Sensors.ProximitySensor import ProximitySensor
+import random
+
+
+
+agent_controller = [MyController]
+agent_sensing = [ProximitySensor, MySensor]
+exp1 = Experiment(config, agent_controller, agent_sensing)
 
 exp1.run(1)

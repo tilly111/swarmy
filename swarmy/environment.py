@@ -27,7 +27,7 @@ class Environment():
     Args:
         rendering (bolean): set simulation rendering on or off
     """    
-    def __init__(self, rendering, config):
+    def __init__(self, config):
         """
         Initialize environment object.
         """     
@@ -38,18 +38,8 @@ class Environment():
         self.BACKGROUND_COLOR = config['background_color']
         self.width = config['world_width'] #pygame.display.Info().current_w
         self.height = config['world_height'] #pygame.display.Info().current_h
-
-        # init basic rendering surface
-        if(rendering == 1):
-            if(self.width == pygame.display.Info().current_w and self.height == pygame.display.Info().current_h):   # fullscreen size
-                self.displaySurface = pygame.display.set_mode((self.width, self.height), pygame.FULLSCREEN)
-            else:                                                                                                   # size smaller than fullscreen
-                self.displaySurface = pygame.display.set_mode((self.width, self.height), pygame.RESIZABLE)
-        elif(rendering == -1):
-            self.displaySurface = pygame.display.set_mode((self.width, self.height), pygame.HIDDEN)                 # no screen
-        elif(rendering == 0):
-            self.displaySurface = pygame.display.set_mode((self.width, self.height), pygame.NOFRAME)                # black screen where capture images is possible
-
+        self.config = config
+        
         # list with objects to be plotted
         self.staticRectList = []
         self.staticCircList = []
@@ -62,6 +52,19 @@ class Environment():
         ### SOLUTION LIGHT DISTRIBUTION ###
         #self.light_dist = np.zeros((self.width,self.height))
         #self.defineLight()
+
+    def render_init(self):
+        # init basic rendering surface
+        if(self.config['rendering']== 1):
+            if(self.width == pygame.display.Info().current_w and self.height == pygame.display.Info().current_h):   # fullscreen size
+                self.displaySurface = pygame.display.set_mode((self.width, self.height), pygame.FULLSCREEN)
+            else:                                                                                                   # size smaller than fullscreen
+                self.displaySurface = pygame.display.set_mode((self.width, self.height), pygame.RESIZABLE)
+        elif(self.config['rendering'] == -1):
+            self.displaySurface = pygame.display.set_mode((self.width, self.height), pygame.HIDDEN)                 # no screen
+        elif(self.config['rendering'] == 0):
+            self.displaySurface = pygame.display.set_mode((self.width, self.height), pygame.NOFRAME)                # black screen where capture images is possible
+
 
     @abstractmethod
     def add_static_rectangle_object(self):

@@ -3,9 +3,9 @@ import pygame
 import numpy as np
 
 class my_environment(Environment):
-    def __init__(self, rendering, config):
+    def __init__(self, config):
         self.config = config
-        super().__init__(rendering, config)
+        super().__init__(config)
         #self.add_static_rectangle_object()
         self.light_dist = self.defineLight()
 
@@ -20,7 +20,6 @@ class my_environment(Environment):
         self.staticRectList.append(['BLACK', pygame.Rect(5, 5, 5, self.config['world_height']-10), 5])
         self.staticRectList.append(['BLACK', pygame.Rect(5, self.config['world_height']-10, self.config['world_width'] - 10,5), 5])
         self.staticRectList.append(['BLACK', pygame.Rect(self.config['world_width'] - 10, 5, 5, self.config['world_height']-10), 5])
-
 
     def add_dynamic_rectangle_object(self):
         """

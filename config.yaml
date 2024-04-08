@@ -20,3 +20,7 @@ default_angle_velocity: 2     # choose even number
 
 controller_1 : 1
 controller_2 : 0.5
+
+
+#  options ...
+rendering : 1

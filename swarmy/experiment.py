@@ -24,7 +24,7 @@ import sys
 sys.path.insert(0, '..')  # add parent directory to path
 # import internal object classes
 #from .environment import Environment
-from World import my_environment
+#from world.my_world import my_environment
 ##from .item import Obstacle
 from .agent import Agent
 
@@ -33,12 +33,14 @@ from .agent import Agent
 # =============================================================================
 class Experiment():
     
-    def __init__(self, config, agent_controller, agent_sensing):
+    def __init__(self, config, agent_controller, agent_sensing, world):
         super(Experiment, self).__init__()
 
         self.config = config
         self.agent_controller = agent_controller
         self.agent_sensing = agent_sensing
+        self.world = world
+        
 
 
 
@@ -51,8 +53,8 @@ class Experiment():
             rendering               (int):   1 = show simulation; -1 = hide simulation; 0 = black screen (capture mode)           
         """
         # pygame presets
-        pygame.init()  					        # initialize pygame
-        running = True  				        # termination condition
+        pygame.init() 					        # initialize pygame
+        running = True   				        # termination condition
             
         # tracking variable
         timesteps_counter = 0
@@ -61,7 +63,9 @@ class Experiment():
         # instantiations
 
         # instantiate environment
-        environment = my_environment(rendering, self.config)
+        #environment = my_environment(rendering, self.config)
+        environment = self.world
+        environment.render_init()
 
         # instatiate agent
         agentList = []

@@ -6,8 +6,8 @@ import math
 
 class Aggressive(Actuation):
 
-    def __init__(self, agent, p, d, config):
-        super().__init__(agent, p, d)
+    def __init__(self, agent, config):
+        super().__init__(agent)
         self.linear_velocity = 3
         self.angle_velocity = 6
 
@@ -22,13 +22,18 @@ class Aggressive(Actuation):
         - self.stepBackward(velocity)
         - self.turn_right(angle_velocity)
         - self.turn_left(angle_velocity)
-        - self.agent.get_position() # get the current position of the robot x,y and angle (unit vector)
+        - self.agent.get_position() # get the current position of the robot x,y and angle.
+        - self.agent.set_position(new_position_x, new_position_y, robot_heading) # set the new position of the robot
+        - self.agent.get_perception() returns the sensor values that you implemented in sensor() of the class MySensor()
+
         Returns:
         """
 
 
         robot_position_x, robot_position_y, robot_heading = self.agent.get_position()
-        s_r, s_l = self.agent.perception.Sensor()
+
+        s_r, s_l = self.agent.get_perception()[1]
+        print(self.agent.get_perception())
 
         vel_r = s_r * 10
         vel_l = s_l * 10
@@ -40,14 +45,10 @@ class Aggressive(Actuation):
 
         new_position_x = robot_position_x + new_direction_x * (vel_r + vel_l) / 2
         new_position_y = robot_position_y + new_direction_y * (vel_r + vel_l) / 2
-
+        self.agent.trajectory.append([new_position_x, new_position_y])
         self.agent.set_position(new_position_x, new_position_y, robot_heading)
+        print(self.agent.trajectory)
 
-
-        """
-        #self.stepForward(self.linear_velocity * random.random())
-        #self.turn_right(self.angle_velocity * random.randint(-4, 4))
-        """
 
     def torus(self):
 

@@ -6,8 +6,8 @@ import math
 
 class Fear(Actuation):
 
-    def __init__(self, agent, p, d, config):
-        super().__init__(agent, p, d)
+    def __init__(self, agent, config):
+        super().__init__(agent)
         self.linear_velocity = 3
         self.angle_velocity = 6
 
@@ -28,8 +28,8 @@ class Fear(Actuation):
 
 
         robot_position_x, robot_position_y, robot_heading = self.agent.get_position()
-        s_r, s_l = self.agent.perception.Sensor()
-
+        s_r, s_l =  self.agent.get_perception()[1]
+        print(self.agent.get_perception())
         vel_r = (1 - ((s_r))) * 10
         vel_l = (1 - ((s_l))) * 10
 
@@ -40,14 +40,9 @@ class Fear(Actuation):
 
         new_position_x = robot_position_x + new_direction_x * (vel_r + vel_l) / 2
         new_position_y = robot_position_y + new_direction_y * (vel_r + vel_l) / 2
-
+        self.agent.trajectory.append([new_position_x, new_position_y])
         self.agent.set_position(new_position_x, new_position_y, robot_heading)
 
-
-        """
-        #self.stepForward(self.linear_velocity * random.random())
-        #self.turn_right(self.angle_velocity * random.randint(-4, 4))
-        """
 
     def torus(self):
 

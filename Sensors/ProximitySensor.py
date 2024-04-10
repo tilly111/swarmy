@@ -11,8 +11,8 @@ class ProximitySensor(Perception):
         self.environment = e
         self.config = config
 
-    def Sensor(self):
-        print("Proximity Sensor")
+    def sensor(self):
+        #print("Proximity Sensor")
         robot_position_x, robot_position_y, robot_heading = self.agent.get_position()
         rob_pos = pygame.Vector2(robot_position_x, robot_position_y)
         range = 60
@@ -42,14 +42,14 @@ class ProximitySensor(Perception):
         testbedHeight = self.agent.environment.height
 
         sensor_val = [0, 0, 0]
-        print(self.agent.environment.staticRectList)
+        #print(self.agent.environment.staticRectList)
         for idx_w,wall in enumerate(self.agent.environment.staticRectList):
             for idx,line in enumerate(dynamicLineList):
                 line_new = np.asarray(wall[1].clip(line))
                 if (line_new[2]>0):
                     d = math.dist([line_new[0],line_new[1]],[rob_pos.x, rob_pos.y])
                     sensor_val[idx]= 1-d/range
-        print(sensor_val)
+        #print(sensor_val)
         return sensor_val
 
 

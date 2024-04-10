@@ -26,20 +26,21 @@ sys.path.insert(0, '..')  # add parent directory to path
 #from .environment import Environment
 #from world.my_world import my_environment
 ##from .item import Obstacle
-from .agent import Agent
+##from .agent import Agent
 
 # =============================================================================
 # Class
 # =============================================================================
 class Experiment():
     
-    def __init__(self, config, agent_controller, agent_sensing, world):
+    def __init__(self, config, agent_controller, agent_sensing, world, agent):
         super(Experiment, self).__init__()
 
         self.config = config
         self.agent_controller = agent_controller
         self.agent_sensing = agent_sensing
         self.world = world
+        self.agent = agent
         
 
 
@@ -63,7 +64,6 @@ class Experiment():
         # instantiations
 
         # instantiate environment
-        #environment = my_environment(rendering, self.config)
         environment = self.world
         environment.render_init()
 
@@ -71,26 +71,27 @@ class Experiment():
         agentList = []
         agent_counter = 0
         controller_counter = 0
-        sensing_counter = 0
+        #sensing_counter = 0
         while agent_counter <self.config['number_of_agents']:
-            x = random.randint(0, self.config['world_width']) ## self.agent_behavior['init_x_y_position']
-            y = random.randint(0, self.config['world_height'])
-            print(agent_counter/self.config['number_of_agents'])
+            ##x = random.randint(0, self.config['world_width']) ## self.agent_behavior['init_x_y_position']
+           ## y = random.randint(0, self.config['world_height'])
+            ##print(agent_counter/self.config['number_of_agents'])
             if agent_counter/self.config['number_of_agents'] >= self.config['controller_1']:
-                print("test")
                 controller_counter = 1
-            agentList.append(Agent(environment,self.agent_controller[controller_counter],self.agent_sensing, self.config ))
+            newAgent = self.agent(environment,self.agent_controller[controller_counter],self.agent_sensing, self.config)
+            newAgent.initial_position()
+            newAgent.unique_id = agent_counter
+            agentList.append(newAgent)
             agent_counter +=1
-        #newAgent = Agent(self.agent_behavior['init_x_y_position'], self.agent_behavior['init_direction'], environment, self.agent_behavior, self.config )
-    
         # -----------------------------------------------------------------------------
         # initializations
-        agentList[0].body.helperLUT()    # global lookup table needs to be calculated only once
+        if agentList:
+            agentList[0].body.helperLUT()    # global lookup table needs to be calculated only once
 
         # =============================================================================
         # Run experiment: Loop-Processing
         # =============================================================================
-        while running:
+        while running and timesteps_counter < self.config["max_timestep"]:
             timesteps_counter += 1        
             
             #-----------------------------------------------------------------------------
@@ -118,15 +119,18 @@ class Experiment():
             # update agents
             for newAgent in agentList:
                 newAgent.processing.perform(pressedKeys)
-            #### SOLUTION ### Torus
-            #newAgent.actuation.position[0] = newAgent.actuation.position[0] % environment.width
-            #newAgent.actuation.position[1] = newAgent.actuation.position[1] % environment.height
 
             # display results
             if(rendering == 1):
                 for newAgent in agentList:
                     newAgent.body.render()         # update agent bod
                 environment.render()           # update content on display
+        if self.config['save_trajectory']:
+            for i,agent in enumerate(agentList):
+                if i == len(agentList)-1:
+                    agent.save_information(True)
+                else:
+                    agent.save_information(False)
 
         pygame.quit()
         return None

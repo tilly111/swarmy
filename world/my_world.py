@@ -23,9 +23,10 @@ class my_environment(Environment):
 
     def add_dynamic_rectangle_object(self):
         """
+        #TODO delete
         Add dynamic rectangle object to the environment such as moving obstacles.
         Example:
-            self.dynamicRectList.append(color, pygame.Rect(x, y, width, height), border_width))
+            self.dynamicRectList.append([color, pygame.Rect(x, y, width, height), border_width)])
         Returns:
         """
         pass
@@ -34,31 +35,25 @@ class my_environment(Environment):
         """
         Add static circle object to the environment such as sources or sinks.
         Example:
-            self.staticCircList.append(color, position, border_width, radius)
+            self.staticCircList.append([color, position, border_width, radius])
         Returns:
         """
         pass
 
-    def add_dynamic_circle_object(self):
-        """
-        Add dynamic circle object to the environment such as moving sources or sinks.
-        Example:
-            self.dynamicCircList.append(color, position, border_width, radius)
-        Returns:
-        """
-        pass
+
 
     def set_background_color(self):
         """
         Set the background color of the environment.
         Example:
             self.displaySurface.fill(self.BACKGROUND_COLOR)
+        Hint: It is possible to use the light distribution to set the background color.
         Returns:
         """
         self.displaySurface.fill(self.BACKGROUND_COLOR)
 
-        #surface = pygame.surfarray.make_surface(self.light_dist)
-        #self.displaySurface.blit(surface,(0,0))
+        surface = pygame.surfarray.make_surface(self.light_dist)
+        self.displaySurface.blit(surface,(0,0))
 
         # for displaying a light destribution you might find pygame.surfarray.make_surface and self.displaySurface.blit usefull)
 
@@ -67,6 +62,11 @@ class my_environment(Environment):
     ###  LIGHT DISTRIBUTION ###
 
     def defineLight(self):
+        """
+        Define the light distribution of the environment.
+        Returns: 3 dimensional light distribution tuple (x,y,light_intensity)
+
+        """
 
         center = np.array([self.config['world_width'] / 2, self.config['world_height'] / 2])
 
@@ -76,4 +76,5 @@ class my_environment(Environment):
                 p = np.array([i, j])
                 dist = int((1 - np.linalg.norm((center - p) / self.config['world_width'] )) * 255)
                 light_dist[i][j][2] = int(dist)
+                print(np.shape(light_dist))
         return light_dist

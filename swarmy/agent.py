@@ -17,6 +17,7 @@ from .perception import Perception
 #from .actuation import Actuation
 from .body import Body
 from .processing import Processing
+from abc import abstractmethod
 #from .actuation import Actuation
 #from my_controller import MyController
 
@@ -45,7 +46,7 @@ class Agent():
         """
         # environment and other objects. This variables are only needed for simulation calculations and are not needed from the agents point of view
         self.environment = e
-
+        self.unique_id = None
         # instantiate agent parts
         self.body = Body(self)
         self.perception = []
@@ -54,6 +55,31 @@ class Agent():
         ##self.perception = sensor(self, e, config)   #   MySensor(self, e)
         self.actuation = controller(self, config)   #MyController(self, p, d)
         self.processing = Processing(self)
+        self.config = config
+
+    @abstractmethod
+    def initial_position(self):
+        """
+        Define the initial position of the agent.
+        """
+        print("initial position not implemented")
+        pass
+
+
+    @abstractmethod
+    def assign_controller_and_sensors(self):
+        """
+        Define the controller and sensors of the agent.
+        """
+        print("controller and sensors not implemented")
+        pass
+    @abstractmethod
+    def save_information(self):
+        """
+        Save information of the agent, e.g. trajectory or the einvironmental plot
+        """
+        print("save information not implemented")
+        pass
 
     def get_position(self):
         """
@@ -70,6 +96,12 @@ class Agent():
         self.actuation.position[0] = x
         self.actuation.position[1] = y
         self.actuation.angle = gamma
+
+    def get_perception(self):
+        sensor_values = [self.unique_id]
+        for sensor in self.perception:
+            sensor_values.append(sensor.sensor())
+        return sensor_values
 
 
 

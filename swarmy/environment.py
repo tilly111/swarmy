@@ -49,6 +49,7 @@ class Environment():
 
         self.clock = pygame.time.Clock()  # create an object to help track time
         self.add_static_rectangle_object()
+        self.add_static_circle_object()
         ### SOLUTION LIGHT DISTRIBUTION ###
         #self.light_dist = np.zeros((self.width,self.height))
         #self.defineLight()
@@ -68,7 +69,7 @@ class Environment():
 
     @abstractmethod
     def add_static_rectangle_object(self):
-        print("No static rect objects implemented")
+       pass
 
     @abstractmethod
     def add_dynamic_rectangle_object(self):
@@ -76,16 +77,17 @@ class Environment():
 
     @abstractmethod
     def add_static_circle_object(self):
-        print("No static rect objects implemented")
+        pass
 
     @abstractmethod
-    def add_dynamic_circle_object(self):
-        print("No dynamic rect objects implemented")
+    def add_dynamic_circle_object(self,circle):
+        self.dynamicCircList.append(circle)
 
     @abstractmethod
     def set_background_color(self):
         self.displaySurface.fill(self.BACKGROUND_COLOR)
 
+    """
     def defineLight(self):
         center = np.array([self.width/2,self.height/2])
         
@@ -105,21 +107,22 @@ class Environment():
 
         self.light_dist = light_dist1
         #print(np.min(self.light_dist))
+    """
 
 
 #%% Rendering and Helper functions
     def render(self):
         """
-        This method is used to update the whole environment.
+        This method is used to update the environment.
         """
-        ##surface = pygame.surfarray.make_surface(self.light_dist)
-        ##self.displaySurface.blit(surface,(0,0))
-        #self.displaySurface.fill(self.BACKGROUND_COLOR)
         self.set_background_color()
 
         # draw static rects (items = sources, sinks, obstacles)
         for x in self.staticRectList:
-            pygame.draw.rect(self.displaySurface, x[0], x[1], x[2])   
+            pygame.draw.rect(self.displaySurface, x[0], x[1], x[2])
+
+        for x in self.staticCircList:
+            pygame.draw.circle(self.displaySurface, x[0], x[1], x[2], x[3])
                       
         # draw dynamic polygons (agents)
         for x in self.dynamicPolyList:

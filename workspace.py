@@ -27,15 +27,15 @@ from controller.aggressive import Aggressive
 from controller.fear import Fear
 from controller.my_controller import MyController
 from Sensors.my_sensors import MySensor
-from Sensors.proximitySensor import ProximitySensor
+from Sensors.bumper_sensor import BumperSensor
 from world.my_world import my_environment
 from agent.my_agent import MyAgent
 
 
 
 
-agent_controller = [Aggressive, Fear]
-agent_sensing = [MySensor, ProximitySensor]
+agent_controller = [MyController]
+agent_sensing = [BumperSensor]
 world = my_environment(config)  #<----- proably not needed
 
 exp1 = Experiment(config, agent_controller, agent_sensing, world, MyAgent)

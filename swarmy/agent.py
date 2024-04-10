@@ -18,6 +18,7 @@ from .perception import Perception
 from .body import Body
 from .processing import Processing
 from abc import abstractmethod
+import pygame
 #from .actuation import Actuation
 #from my_controller import MyController
 
@@ -96,6 +97,8 @@ class Agent():
         self.actuation.position[0] = x
         self.actuation.position[1] = y
         self.actuation.angle = gamma
+        #self.environment.add_dynamic_circle_object([(0, 0, 255), (x, y), 20, 1])
+        #self.environment.add_dynamic_rectangle_object(['BLACK', pygame.Rect(x-15, y-15, 30, 30),5])
 
     def get_perception(self):
         sensor_values = [self.unique_id]

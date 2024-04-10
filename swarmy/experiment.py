@@ -83,6 +83,7 @@ class Experiment():
             newAgent.unique_id = agent_counter
             agentList.append(newAgent)
             agent_counter +=1
+        environment.agentlist = agentList
         # -----------------------------------------------------------------------------
         # initializations
         if agentList:
@@ -92,7 +93,8 @@ class Experiment():
         # Run experiment: Loop-Processing
         # =============================================================================
         while running and timesteps_counter < self.config["max_timestep"]:
-            timesteps_counter += 1        
+            timesteps_counter += 1
+
             
             #-----------------------------------------------------------------------------
             # ASYNCHRON 
@@ -115,22 +117,30 @@ class Experiment():
      
             #-----------------------------------------------------------------------------
             # SYNCHRON         
-     
+            for agent in agentList:
+                environment.agent_object_list.append(
+                    pygame.Rect(agent.actuation.position[0] - 15, agent.actuation.position[1] - 15, 30, 30))
             # update agents
             for newAgent in agentList:
                 newAgent.processing.perform(pressedKeys)
+                #pygame.Rect(5, self.config['world_height'] - 10, self.config['world_width'] - 10, 5)
+
 
             # display results
             if(rendering == 1):
                 for newAgent in agentList:
                     newAgent.body.render()         # update agent bod
                 environment.render()           # update content on display
+
+            environment.agent_object_list = []
         if self.config['save_trajectory']:
             for i,agent in enumerate(agentList):
                 if i == len(agentList)-1:
                     agent.save_information(True)
                 else:
                     agent.save_information(False)
+
+
 
         pygame.quit()
         return None

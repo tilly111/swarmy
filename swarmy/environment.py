@@ -46,6 +46,10 @@ class Environment():
         self.dynamicCircList = []
         self.dynamicPolyList = []
         self.dynamicLineList = []
+        self.dynamicRectList = []
+        self.agentlist = []
+        self.agent_object_list = []
+        self.bumper_object_list = []
 
         self.clock = pygame.time.Clock()  # create an object to help track time
         self.add_static_rectangle_object()
@@ -71,15 +75,17 @@ class Environment():
     def add_static_rectangle_object(self):
        pass
 
-    @abstractmethod
-    def add_dynamic_rectangle_object(self):
-        print("No dynamic rect objects implemented")
+
+    def add_dynamic_rectangle_object(self,rectangle):
+        self.dynamicRectList.append(rectangle)
+
+    def add_dynamic_line_object(self,line):
+        self.dynamicLineList.append(line)
 
     @abstractmethod
     def add_static_circle_object(self):
         pass
 
-    @abstractmethod
     def add_dynamic_circle_object(self,circle):
         self.dynamicCircList.append(circle)
 
@@ -87,6 +93,18 @@ class Environment():
     def set_background_color(self):
         self.displaySurface.fill(self.BACKGROUND_COLOR)
 
+    def get_static_rect_list(self):
+        return self.staticRectList
+    def get_dynamic_rect_list(self):
+        return self.dynamicRectList
+    def get_static_circ_list(self):
+        return self.staticCircList
+    def get_dynamic_circ_list(self):
+        return self.dynamicCircList
+    def get_agent_object(self):
+        return self.agent_object_list
+    def get_dynamic_line_list(self):
+        return self.dynamicLineList
     """
     def defineLight(self):
         center = np.array([self.width/2,self.height/2])
@@ -123,18 +141,26 @@ class Environment():
 
         for x in self.staticCircList:
             pygame.draw.circle(self.displaySurface, x[0], x[1], x[2], x[3])
+
                       
         # draw dynamic polygons (agents)
         for x in self.dynamicPolyList:
             pygame.draw.polygon(self.displaySurface, (255,255,255), x[1]) # fill the polygon
-            pygame.draw.polygon(self.displaySurface, x[0], x[1], 3)  
+            pygame.draw.polygon(self.displaySurface, x[0], x[1], 3)
+
 
         # draw dynamic circles (agent tokens)
         for x in self.dynamicCircList:
-            pygame.draw.circle(self.displaySurface, x[0], x[1], x[2], x[3])
+            agent = pygame.draw.circle(self.displaySurface, x[0], x[1], x[2], x[3])
+            #print("test", agent)
+            #self.agent_object_list.append(agent)
 
         for x in self.dynamicLineList:
             pygame.draw.line(self.displaySurface, x[0], x[1], x[2])
+
+        for x in self.dynamicRectList:
+            pygame.draw.rect(self.displaySurface, x[0], x[1], x[2])
+
 
         # reset dynamic buffers
         self.resetDynamicBuffers()                  
@@ -147,6 +173,7 @@ class Environment():
         self.dynamicCircList = []
         self.dynamicPolyList = []
         self.dynamicLineList = []
+        self.dynamicRectList = []
         
             
 

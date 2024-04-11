@@ -23,6 +23,6 @@ agent_controller = [MyController]
 # add your sensors, if you have more than one sensor, add them to the list all sensors are added to each robot
 agent_sensing = [BumperSensor]
 
-exp1 = Experiment(config, agent_controller, agent_sensing, my_environment, MyAgent)
+exp1 = Experiment(config, agent_controller, agent_sensing, My_environment, MyAgent)
 
 exp1.run(1)

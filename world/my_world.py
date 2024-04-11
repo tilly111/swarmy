@@ -6,7 +6,6 @@ class my_environment(Environment):
     def __init__(self, config):
         self.config = config
         super().__init__(config)
-        #self.add_static_rectangle_object()
         self.light_dist = self.defineLight()
 
     def add_static_rectangle_object(self):
@@ -39,17 +38,10 @@ class my_environment(Environment):
         Example:
             self.displaySurface.fill(self.BACKGROUND_COLOR)
         Hint: It is possible to use the light distribution to set the background color.
+        For displaying a light destribution you might find pygame.surfarray.make_surface and self.displaySurface.blit usefull)
         Returns:
         """
         self.displaySurface.fill(self.BACKGROUND_COLOR)
-
-
-        surface = pygame.surfarray.make_surface(self.light_dist)
-        self.displaySurface.blit(surface,(0,0))
-
-        # for displaying a light destribution you might find pygame.surfarray.make_surface and self.displaySurface.blit usefull)
-
-
 
     ###  LIGHT DISTRIBUTION ###
 
@@ -60,15 +52,5 @@ class my_environment(Environment):
 
         """
         """ your implementation here"""
+        pass
 
-
-        center = np.array([self.config['world_width'] / 2, self.config['world_height'] / 2])
-
-        light_dist = np.zeros((self.config['world_width'] , self.config['world_height'], 3))
-        for i in range(self.config['world_width'] ):
-            for j in range(self.config['world_height']):
-                p = np.array([i, j])
-                dist = int((1 - np.linalg.norm((center - p) / self.config['world_width'] )) * 255)
-                light_dist[i][j][2] = int(dist)
-                #print(np.shape(light_dist))
-        return light_dist

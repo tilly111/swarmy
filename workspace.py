@@ -23,21 +23,18 @@ with open ('config.yaml', 'r') as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
 ### import your controller and sensors
-from controller.aggressive import Aggressive
-from controller.fear import Fear
 from controller.my_controller import MyController
-from Sensors.my_sensors import MySensor
 from Sensors.bumper_sensor import BumperSensor
 from world.my_world import my_environment
 from agent.my_agent import MyAgent
 
 
 
-
+# add your controller, if you have more than one controller, add them to the list and specify the percentage of robots that should use this controller in the config.yaml file
 agent_controller = [MyController]
+# add your sensors, if you have more than one sensor, add them to the list all sensors are added to each robot
 agent_sensing = [BumperSensor]
-world = my_environment(config)  #<----- proably not needed
 
-exp1 = Experiment(config, agent_controller, agent_sensing, world, MyAgent)
+exp1 = Experiment(config, agent_controller, agent_sensing, my_environment, MyAgent)
 
 exp1.run(1)

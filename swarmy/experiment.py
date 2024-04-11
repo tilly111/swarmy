@@ -39,7 +39,7 @@ class Experiment():
         self.config = config
         self.agent_controller = agent_controller
         self.agent_sensing = agent_sensing
-        self.world = world
+        self.world = world(config)
         self.agent = agent
         
 

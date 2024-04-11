@@ -38,26 +38,26 @@ class MyController(Actuation):
             self.agent.set_position(x,y,gamma)
             self.init_pos = False
 
-        #random controller
+        # example controller
         sensor = self.agent.get_perception()
         if sensor[1] == 1:
-            self.turn_right(3)
-            self.stepForward(-1)
+            self.turn_right(3)   # turn right
+            self.stepForward(-1) # move backwards
         else:
-            self.stepForward(2 * random.random())
-            #self.turn_right(2 * random.randint(-4, 4))
-    def torus(self):
+            self.stepForward(2 * random.random()) # move forward with random velocity
+            # self.turn_right(2 * random.randint(-4, 4)) # turn right or left with random angle velocity
 
+    def torus(self):
         """
         Implement torus world by manipulating the robot position. Again self.agent.get_position and self.agent.set_position might be useful
-
         """
         robot_position_x,robot_position_y, robot_heading = self.agent.get_position()
-        ### Solution ##
-        if robot_position_x < 0 or robot_position_y < 0 or robot_position_x > self.config['world_width'] or robot_position_y > self.config['world_height']:
-            robot_position_x %=  self.config['world_width']
-            robot_position_y %=  self.config['world_height']
-            self.agent.set_position(robot_position_x, robot_position_y, robot_heading)
+
+
+        """ Implement torus world by manipulating the robot position, here."""
+
+
+        self.agent.set_position(robot_position_x, robot_position_y, robot_heading)
 
 
 

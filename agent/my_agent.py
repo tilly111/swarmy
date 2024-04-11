@@ -16,9 +16,7 @@ class MyAgent(Agent):
         Define the initial position of the agent.
         Hint:
         Use x,y,gamma = self.set_position(x-position, y-position, heading) to set the position of the agent.
-        Use self.set_position(x,y,gamma) to set the position of the agent.
         """
-
         x = random.randint(0, self.config['world_width'])
         y = random.randint(0, self.config['world_height'])
 

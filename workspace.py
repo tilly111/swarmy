@@ -4,28 +4,16 @@
 # version:      0.9
 # status:       prototype
 # =============================================================================
-
-"""
-Description:
-This module is the workspace for the simulation environment where:
-    - paths and directories can be defined
-    - experiments can be performed
-    - measurement results can be saved
-    - results can be evaluated
-"""
-
-
-# %% Experiment: Testing
 import yaml
 from swarmy.experiment import Experiment
 
+### load the configuration file, check the config.yaml file for more information and to change to your needs
 with open ('config.yaml', 'r') as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
-
-### import your controller and sensors
+## Import uour implementation of the controller, sensor, environment and agent
 from controller.my_controller import MyController
-from Sensors.bumper_sensor import BumperSensor
-from world.my_world import my_environment
+from sensors.bumper_sensor import BumperSensor
+from world.my_world import My_environment
 from agent.my_agent import MyAgent
 
 

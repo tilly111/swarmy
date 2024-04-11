@@ -71,11 +71,7 @@ class Experiment():
         agentList = []
         agent_counter = 0
         controller_counter = 0
-        #sensing_counter = 0
         while agent_counter <self.config['number_of_agents']:
-            ##x = random.randint(0, self.config['world_width']) ## self.agent_behavior['init_x_y_position']
-           ## y = random.randint(0, self.config['world_height'])
-            ##print(agent_counter/self.config['number_of_agents'])
             if agent_counter/self.config['number_of_agents'] >= self.config['controller_1']:
                 controller_counter = 1
             newAgent = self.agent(environment,self.agent_controller[controller_counter],self.agent_sensing, self.config)
@@ -141,6 +137,6 @@ class Experiment():
                     agent.save_information(False)
 
 
-
+        print('Experiment finished by manual stopping or maximum timesteps reached. Check config.yaml to increase the maximum timesteps.')
         pygame.quit()
         return None

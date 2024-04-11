@@ -8,8 +8,8 @@ class MyController(Actuation):
     def __init__(self, agent,config):
         super().__init__(agent)
         """
-        self.linear_velocity 
-        self.angle_velocity 
+        self.linear_velocity = <your value> # set the linear velocity of the robot
+        self.angle_velocity =  <your value> # set the angular velocity of the robot
         """
         self.config = config
         self.init_pos = True            # flag to set initial position of the robot
@@ -32,19 +32,15 @@ class MyController(Actuation):
 
         #Set initial robot position and direction
         if self.init_pos:
-            x = random.randint(10, self.config['world_width'] - 10)
-            y = random.randint(10, self.config['world_height'] - 10)
-            gamma = random.randint(0, 360)
-            self.agent.set_position(x,y,gamma)
+            self.agent.initial_position()
             self.init_pos = False
 
         # example controller
         sensor = self.agent.get_perception()
         if sensor[1] == 1:
-            self.turn_right(3)   # turn right
-            self.stepForward(-1) # move backwards
+            self.stepForward(0) # move backwards
         else:
-            self.stepForward(2 * random.random()) # move forward with random velocity
+            self.stepForward(1) # move forward with random velocity
             # self.turn_right(2 * random.randint(-4, 4)) # turn right or left with random angle velocity
 
     def torus(self):

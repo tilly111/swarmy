@@ -2,10 +2,11 @@ from swarmy.environment import Environment
 import pygame
 import numpy as np
 
-class my_environment(Environment):
+class My_environment(Environment):
     def __init__(self, config):
         self.config = config
         super().__init__(config)
+
         self.light_dist = self.defineLight()
 
     def add_static_rectangle_object(self):

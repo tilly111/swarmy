@@ -107,6 +107,23 @@ class Agent():
         return sensor_values
 
 
+    ### new ###
+    def get_control_params(self):
+        return self.actuation.control_params
+
+    def set_control_params(self, control_params):
+        self.actuation.control_params = control_params
+
+    @abstractmethod
+    def get_evaluation_params(self):
+        pass
+
+    @abstractmethod
+    def set_evaluation_params(self, something):
+        pass
+
+
+
 
 
 

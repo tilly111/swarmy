@@ -41,7 +41,35 @@ class Experiment():
         self.agent_sensing = agent_sensing
         self.world = world(config)
         self.agent = agent
+        self.agent_list = []
+        self.running = False
+        self.save_trajectory = False
         
+
+
+    def init_robots(self):
+
+        pygame.init() 					        # initialize pygame
+        self.running = True   				        # termination condition
+        self.world.render_init()
+        agentList = []
+        agent_counter = 0
+        controller_counter = 0
+        while agent_counter <self.config['number_of_agents']:
+            if agent_counter/self.config['number_of_agents'] >= self.config['controller_1']:
+                controller_counter = 1
+            newAgent = self.agent(self.world,self.agent_controller[controller_counter],self.agent_sensing, self.config)
+            newAgent.initial_position()
+            newAgent.unique_id = agent_counter
+            agentList.append(newAgent)
+            self.agent_list.append(newAgent)
+            agent_counter +=1
+        self.world.agentlist = agentList
+        # -----------------------------------------------------------------------------
+        # initializations
+        if agentList:
+            agentList[0].body.helperLUT()    # global lookup table needs to be calculated only once
+
 
 
 
@@ -54,8 +82,8 @@ class Experiment():
             rendering               (int):   1 = show simulation; -1 = hide simulation; 0 = black screen (capture mode)           
         """
         # pygame presets
-        pygame.init() 					        # initialize pygame
-        running = True   				        # termination condition
+        ####pygame.init() 					        # initialize pygame
+        ###running = True   				        # termination condition
             
         # tracking variable
         timesteps_counter = 0
@@ -64,11 +92,13 @@ class Experiment():
         # instantiations
 
         # instantiate environment
+        """
         environment = self.world
         environment.render_init()
+        """
 
         # instatiate agent
-        agentList = []
+        """        agentList = []
         agent_counter = 0
         controller_counter = 0
         while agent_counter <self.config['number_of_agents']:
@@ -78,17 +108,18 @@ class Experiment():
             newAgent.initial_position()
             newAgent.unique_id = agent_counter
             agentList.append(newAgent)
+            self.agent_list.append(newAgent)
             agent_counter +=1
         environment.agentlist = agentList
         # -----------------------------------------------------------------------------
         # initializations
         if agentList:
-            agentList[0].body.helperLUT()    # global lookup table needs to be calculated only once
+            agentList[0].body.helperLUT()    # global lookup table needs to be calculated only once"""
 
         # =============================================================================
         # Run experiment: Loop-Processing
         # =============================================================================
-        while running and timesteps_counter < self.config["max_timestep"]:
+        while self.running and timesteps_counter < self.config["max_timestep"]:
             timesteps_counter += 1
 
             
@@ -105,7 +136,7 @@ class Experiment():
                                     
                     # If the Esc key is pressed, then exit the main loop
                     if event.key == pygame.K_ESCAPE:
-                        running = False
+                        self.running = False
                         
                 # Check for QUIT event. If QUIT, then set running to false.
                 elif event.type == pygame.QUIT:
@@ -113,25 +144,25 @@ class Experiment():
      
             #-----------------------------------------------------------------------------
             # SYNCHRON         
-            for agent in agentList:
-                environment.agent_object_list.append(
+            for agent in self.agent_list:
+                self.world.agent_object_list.append(
                     pygame.Rect(agent.actuation.position[0] - 15, agent.actuation.position[1] - 15, 30, 30))
             # update agents
-            for newAgent in agentList:
+            for newAgent in self.agent_list:
                 newAgent.processing.perform(pressedKeys)
                 #pygame.Rect(5, self.config['world_height'] - 10, self.config['world_width'] - 10, 5)
 
 
             # display results
             if(rendering == 1):
-                for newAgent in agentList:
+                for newAgent in self.agent_list:
                     newAgent.body.render()         # update agent bod
-                environment.render()           # update content on display
+                self.world.render()           # update content on display
 
-            environment.agent_object_list = []
+            self.world.agent_object_list = []
         if self.config['save_trajectory']:
-            for i,agent in enumerate(agentList):
-                if i == len(agentList)-1:
+            for i,agent in enumerate(self.agent_list):
+                if i == len(self.agent_list)-1:
                     agent.save_information(True)
                 else:
                     agent.save_information(False)

@@ -8,6 +8,9 @@ class MyAgent(Agent):
 
         self.environment = environment
         self.trajectory = []
+        self.eval_params = []
+        self.current_generation = 0
+
 
 
 
@@ -27,6 +30,8 @@ class MyAgent(Agent):
         self.set_position(x, y, gamma)
 
 
+
+
     def save_information(self, last_robot):
         """
         Save information of the agent, e.g. trajectory or the environmental plot.
@@ -37,7 +42,13 @@ class MyAgent(Agent):
         print("Save information not implemented, check my_agent.py")
         """ your implementation here """
 
-        pass
+
+
+    def set_evaluation_params (self, eval_params):
+        self.eval_params = eval_params
+
+    def get_evaluation_params(self):
+        return self.eval_params
 
 
 

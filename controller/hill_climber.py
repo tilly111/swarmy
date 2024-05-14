@@ -2,8 +2,9 @@ import random
 
 from swarmy.actuation import Actuation
 import yaml
+import math
 
-class MyController(Actuation):
+class HillClimber(Actuation):
 
     def __init__(self, agent,config):
         super().__init__(agent)
@@ -13,7 +14,8 @@ class MyController(Actuation):
         """
         self.config = config
         self.init_pos = True            # flag to set initial position of the robot
-        self.control_params = [0, 0, 0, 0, 0, 0]
+        self.control_params = [0,0,0,0,0,0]
+
 
 
 
@@ -35,13 +37,21 @@ class MyController(Actuation):
             self.agent.initial_position()
             self.init_pos = False
 
-        # example controller
+
+        """ Implement the hill climber behavior here, use the self.control_params that you generated using your hill climber algorithm. """
         sensor = self.agent.get_perception()
-        if sensor[1] == 1:
-            self.stepForward(0) # move backwards
-        else:
-            self.stepForward(1) # move forward with random velocity
-            # self.turn_right(2 * random.randint(-4, 4)) # turn right or left with random angle velocity
+        robot_position_x, robot_position_y, robot_heading = self.agent.get_position()
+
+        new_position_x = robot_position_x
+        new_position_y = robot_position_y
+        new_robot_heading = robot_heading
+
+        self.agent.trajectory.append([new_position_x, new_position_y])
+        self.agent.set_position(new_position_x, new_position_y, new_robot_heading)
+        self.agent.set_evaluation_params(self.agent.trajectory)
+
+
+
 
     def torus(self):
         """

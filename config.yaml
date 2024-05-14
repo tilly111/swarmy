@@ -1,7 +1,7 @@
 
 #Simulation parameters
 FPS: 60 # Frames per second. A typical value is 60 frames per seconds
-max_timestep: 2000 # Maximum number of timesteps for the simulation
+max_timestep: 3000 # Maximum number of timesteps for the simulation
 ## World parameters
 world_width: 500
 world_height: 500
@@ -9,7 +9,7 @@ background_color: !!python/tuple [255, 255, 255]
 
 
 ## Robot parameters
-number_of_agents: 4
+number_of_agents: 1
 default_velocity: 2           # choose even number
 default_angle_velocity: 2     # choose even number
 save_trajectory: 0
@@ -24,3 +24,7 @@ controller_2 : 0
 
 #  options ...
 rendering : 1
+
+
+# Evolution
+generations: 50

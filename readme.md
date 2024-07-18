@@ -41,3 +41,6 @@ from world.my_world import my_environment
 - `sensor` - folder implements the sensor
 - `agent` - folder implementing the agent (the robot)
 - `workspace.py` - example on how to invoke the simulator
+
+## Credit
+This simulator is based on `swarmy` by Samer Al-Magazachi. The original version can be found on [`original_version`](https://github.com/tilly111/swarmy/tree/original_version).

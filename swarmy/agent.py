@@ -12,49 +12,44 @@ This module represents an agent in the environment.
 # =============================================================================
 # Imports
 # =============================================================================
-from .perception import Perception
-#from my_sensors import MySensor
-#from .actuation import Actuation
+from abc import ABC, abstractmethod
+
 from .body import Body
 from .processing import Processing
-from abc import abstractmethod
-import pygame
-#from .actuation import Actuation
-#from my_controller import MyController
+
 
 # =============================================================================
 # Class
 # =============================================================================
-class Agent():
+class Agent(ABC):
     """
-    Autonomous agent that can perceive its enviroment and interact with it.
-    
-    Args
-        p ([int, int]): initial position
-        d (int): initial direction (angle)
-        e (environment.py): instance of environement class
- 
-    
+    Autonomous agent that can perceive its environment and interact with it.
+
+    Args:
+        environment (environment.py): instance of the environment class
+        controller (class): controller class, a subclass of Actuation
+        sensors (list): sensor classes, subclasses of Perception
+        config (dict): simulation configuration from config.yaml
+
     Attributes:
         body        (body.py):         represents the agent body
-        processing  (processing.py):   represents the processing capabilites
+        processing  (processing.py):   represents the processing capabilities
         perception  (perception.py):   represents the sensing capabilities
-        actuation   (actuation.py):    represents the actuator capabilites
+        actuation   (actuation.py):    represents the actuator capabilities
     """
-    def __init__(self,e,controller, sensor, config):
+    def __init__(self, environment, controller, sensors, config):
         """
         Initialize agent object.
         """
-        # environment and other objects. This variables are only needed for simulation calculations and are not needed from the agents point of view
-        self.environment = e
+        # environment and other objects. These variables are only needed for simulation calculations and are not needed from the agent's point of view
+        self.environment = environment
         self.unique_id = None
         # instantiate agent parts
         self.body = Body(self)
         self.perception = []
-        for i in range(len(sensor)):
-            self.perception.append(sensor[i](self, e, config))   #   MySensor(self, e)
-        ##self.perception = sensor(self, e, config)   #   MySensor(self, e)
-        self.actuation = controller(self, config)   #MyController(self, p, d)
+        for sensor in sensors:
+            self.perception.append(sensor(self, environment, config))
+        self.actuation = controller(self, config)
         self.processing = Processing(self)
         self.config = config
 
@@ -63,52 +58,36 @@ class Agent():
         """
         Define the initial position of the agent.
         """
-        print("initial position not implemented")
-        pass
-
+        print('initial position not implemented')
 
     @abstractmethod
-    def assign_controller_and_sensors(self):
+    def save_information(self, last_robot):
         """
-        Define the controller and sensors of the agent.
+        Save information of the agent, e.g. trajectory or the environmental plot.
+        last_robot is True for the last agent, e.g. to save a shared image once.
         """
-        print("controller and sensors not implemented")
-        pass
-    @abstractmethod
-    def save_information(self):
-        """
-        Save information of the agent, e.g. trajectory or the einvironmental plot
-        """
-        print("save information not implemented")
-        pass
+        print('save information not implemented')
 
     def get_position(self):
         """
-        Get the x-y position and direction unit vector of the agent.
-        Returns:
+        Get the x-y position and heading (in degrees) of the agent.
         """
-        x, y, gamma = self.actuation.position[0], self.actuation.position[1], self.actuation.angle
-        return x,y, gamma
+        x, y, heading = self.actuation.position[0], self.actuation.position[1], self.actuation.heading
+        return x, y, heading
 
-    def set_position(self, x: float, y: float, gamma:float):
+    def set_position(self, x: float, y: float, heading: float):
         """
-        Set the x-y position and direction unit vector of the agent.
+        Set the x-y position and heading (in degrees) of the agent.
         """
         self.actuation.position[0] = x
         self.actuation.position[1] = y
-        self.actuation.angle = gamma
-        #self.environment.add_dynamic_circle_object([(0, 0, 255), (x, y), 20, 1])
-        #self.environment.add_dynamic_rectangle_object(['BLACK', pygame.Rect(x-15, y-15, 30, 30),5])
+        self.actuation.heading = heading
 
     def get_perception(self):
+        """
+        Get the ID of the agent followed by the value of each sensor.
+        """
         sensor_values = [self.unique_id]
         for sensor in self.perception:
             sensor_values.append(sensor.sensor())
         return sensor_values
-
-
-
-
-
-
-

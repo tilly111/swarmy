@@ -9,9 +9,6 @@ Description:
 This module includes all computation procedures of an agent, e.g. its behavior in perform()
 """
 
-# =============================================================================
-# Imports
-# =============================================================================
 
 # =============================================================================
 # Class
@@ -19,32 +16,20 @@ This module includes all computation procedures of an agent, e.g. its behavior i
 class Processing():
     """
     In the processing object all computation procedures of an agent are represented.
-    
+
     Args:
-        a (agent.py): instance of the agent
-    """    
-    def __init__(self, a):
+        agent (agent.py): instance of the agent
+    """
+    def __init__(self, agent):
         """
         Initialize processing object.
-        """    
-        self.agent = a
+        """
+        self.agent = agent
 
-    def perform(self, pressedKeys):
+    def perform(self, pressed_keys):
         """
         Update agent processing for one timestep
-        """     
-        #self.agent.actuation.stepForward()
-        #self.agent.actuation.fear()
-        #self.agent.actuation.aggression()
-        self.agent.actuation.processUserInput(pressedKeys)
+        """
+        self.agent.actuation.process_user_input(pressed_keys)
         self.agent.actuation.torus()
         self.agent.actuation.controller()
-
-
-    
-        
-        
-        
-    
-        
-        

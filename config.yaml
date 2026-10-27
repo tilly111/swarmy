@@ -1,26 +1,26 @@
+## Simulation parameters
+FPS: 60                 # Frames per second. A typical value is 60 frames per second
+max_timestep: 2000      # Maximum number of timesteps for the simulation
+seed: null              # set to a number (e.g. 42) to make runs repeatable, null = different every run
 
-#Simulation parameters
-FPS: 60 # Frames per second. A typical value is 60 frames per seconds
-max_timestep: 2000 # Maximum number of timesteps for the simulation
 ## World parameters
 world_width: 500
 world_height: 500
 background_color: !!python/tuple [255, 255, 255]
 
-
 ## Robot parameters
 number_of_agents: 4
-default_velocity: 2           # choose even number
-default_angle_velocity: 2     # choose even number
+default_velocity: 2.5
+default_angular_velocity: 2
 save_trajectory: 0
-## Controller ratios if different controllers are used for different robots
-#Example: If there are 6 robots and the first three robots uses controller_1 and the last three robots uses controller_2, then the controller_ratios will be 50% and 50% of the swarm:
-#controller_1 : 0.5
-#controller_2 : 0.5
 
-controller_1 : 1
-controller_2 : 0
+## Controller ratios: share of the swarm for each controller in the controllers list in workspace.py (same order)
+# Example: If there are 6 robots and the first three robots use controllers[0] and the last three robots use controllers[1]:
+# controller_ratios: [0.5, 0.5]
+controller_ratios: [1.0]
 
-
-#  options ...
-rendering : 1
+## Rendering
+# rendering: 1   normal window
+# rendering: 0   borderless window
+# rendering: -1  no window (no fps limit)
+rendering: 1

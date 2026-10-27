@@ -3,6 +3,7 @@ capture/*
 measurements/*
 test/
 venv/
+.venv/
 .DS_Store
 .idea/
 __pycache__/

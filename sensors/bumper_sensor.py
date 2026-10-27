@@ -1,72 +1,58 @@
 from swarmy.perception import Perception
 import pygame
 import math
-import numpy as np
 
 
 class BumperSensor(Perception):
     def __init__(self, agent, environment, config):
-        super().__init__(agent,environment)
-        self.agent = agent
-        self.environment = environment
+        super().__init__(agent, environment)
         self.config = config
 
     def sensor(self):
-        """ Bumper returs 1 if collision is detected, 0 otherwise
-        Hints:
-        - x,y,gamma = self.agent.get_position() # returns the current position and heading of the robot to calculate the relative postion of the sensor
-        - to visualize the sensors the following function can help
-            - self.environment.add_dynamic_line_object((R,G,B), start of line, end of line)
-            - self.environment.add_dynamic_circle_object([(R,G,B), (x_pos, y_pos), radius, line_width])
-            - self.environment.add_dynamic_rectangle_object([(R,G,B), pygame.Rect(arguments), line_width]),
-        - to detect other object the following functions might help:
-            - self.environment.get_agent_object() - get all robots boundary boxes as pygame.Rect object
-            - self.environment.get_static_rect_list() - get static rectangles such as wall
-            - self.environment.get_static_circ_list() - none implemented yet
-            - self.environment.get_dynamic_circ_list - none implemented yet
-            - self.environment.get_dynamic_line_list() - get dynamic lines such as bumpers
-            - self.environment.get_dynamic_rect_list() - none implemented yet
-
         """
+        Bumper returns 1 if collision is detected, 0 otherwise
+        Hints:
+        - x, y, heading = self.agent.get_position() # returns the current position and heading of the robot to calculate the relative position of the sensor
+        - to visualize the sensors the following functions can help
+            - self.environment.add_dynamic_line_object([(R, G, B), start_of_line, end_of_line])
+            - self.environment.add_dynamic_circle_object([(R, G, B), (x_pos, y_pos), radius, line_width])
+            - self.environment.add_dynamic_rectangle_object([(R, G, B), pygame.Rect(x, y, width, height), line_width])
+        - to detect other objects the following functions might help:
+            - self.environment.get_agent_object() - get all robots boundary boxes as pygame.Rect objects
+            - self.environment.get_static_rectangle_list() - get static rectangles such as walls
+            - self.environment.get_static_circle_list() - none implemented yet
+            - self.environment.get_dynamic_circle_list() - none implemented yet
+            - self.environment.get_dynamic_line_list() - get dynamic lines such as bumpers
+            - self.environment.get_dynamic_rectangle_list() - none implemented yet
+        """
+        # get robot position and heading
+        x, y, heading = self.agent.get_position()
 
-        robot_position_x, robot_position_y, robot_heading = self.agent.get_position()
-        rob_pos = pygame.Vector2(robot_position_x, robot_position_y)
+        robot_position = pygame.Vector2(x, y)
 
-        sensor_1_direction_x_l = math.sin(math.radians(robot_heading + 40))
-        sensor_1_direction_y_l = math.cos(math.radians(robot_heading + 40))
-        sensor_2_direction_x_r = math.sin(math.radians(robot_heading - 40))
-        sensor_2_direction_y_r = math.cos(math.radians(robot_heading - 40))
+        left_direction_x = math.sin(math.radians(heading + 40))
+        left_direction_y = math.cos(math.radians(heading + 40))
+        right_direction_x = math.sin(math.radians(heading - 40))
+        right_direction_y = math.cos(math.radians(heading - 40))
 
-        bumper_l_pos = [(robot_position_x+(sensor_1_direction_x_l*35)),
-                   (robot_position_y+(sensor_1_direction_y_l*35))]
-        bumper_r_pos= [(robot_position_x+(sensor_2_direction_x_r*35)),
-                  (robot_position_y+(sensor_2_direction_y_r*35))]
-
+        bumper_left_end = [x + left_direction_x * 35,
+                           y + left_direction_y * 35]
+        bumper_right_end = [x + right_direction_x * 35,
+                            y + right_direction_y * 35]
 
         bumper_color = (255, 0, 0)
 
-        bumper = [bumper_color, bumper_l_pos, bumper_r_pos]
+        bumper = [bumper_color, bumper_left_end, bumper_right_end]
 
         self.environment.add_dynamic_line_object(bumper)
 
-        # helper to transform lines to rectange objects, allows for collision detection
-        helper_object = pygame.draw.line(self.agent.environment.displaySurface, bumper_color, rob_pos, bumper_l_pos)
-        #self.environment.bumper_object_list.append(helper_object)
+        # get all objects in arena
+        objects = self.environment.get_agent_object() + [wall[1] for wall in self.environment.get_static_rectangle_list()]
 
-
-        # list of all objects in the environment
-        objects = self.environment.get_agent_object() + [wall[1] for wall in self.environment.get_static_rect_list()]
-
-        # check if the robot is colliding with any object
-        sensor_val = 0
-        for idx,line in enumerate(objects):
+        # checks for collision
+        for idx, rect in enumerate(objects):
             if idx == self.agent.unique_id:         # skips the robot itself
                 continue
-
-            intersection = np.asarray(line.clip(helper_object))
-            if intersection [2]>0 :
+            if rect.clipline(robot_position, bumper_left_end) or rect.clipline(robot_position, bumper_right_end):
                 return 1
-
-        return sensor_val
-
-
+        return 0

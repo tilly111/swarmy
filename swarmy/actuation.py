@@ -6,7 +6,7 @@
 # =============================================================================
 """
 Description:
-The module represents the motion capabilites of an agent.
+The module represents the motion capabilities of an agent.
 """
 
 # =============================================================================
@@ -14,40 +14,33 @@ The module represents the motion capabilites of an agent.
 # =============================================================================
 import math
 import pygame
-from abc import abstractmethod
-import numpy as np
-import yaml
+from abc import ABC, abstractmethod
+
+
 # =============================================================================
 # Class
 # =============================================================================
-class Actuation():
+class Actuation(ABC):
     """
     The actuation object represents the physical movement and physical actions.
-    
+
     Available capabilities:
-        Move forward, move backward, 
-        turn left, turn right, turn angle, 
-    
+        move forward, move backward,
+        turn left, turn right
+
     Args:
-        g (agent.py): instance of the agent
-        p ([int, int]): center position
-        d (int): initial angle (direction)    
+        agent (agent.py): instance of the agent
+        config (dict): simulation configuration from config.yaml
     """
-    def __init__(self, g):
+    def __init__(self, agent, config):
         """
         Initialize actuation object.
-        """    
-        # constants
+        """
+        self.agent = agent              # parent python module
+        self.position = [0, 0]
+        self.heading = 0
+        self.config = config
 
-        # variables
-        self.agent = g                  # parent python module
-        self.position = [0,0]
-        self.angle  = 0
-        self.direction = [0,0]          # unit vector showing the direction
-
-        with open('config.yaml', 'r') as file:
-            self.config = yaml.load(file, Loader=yaml.FullLoader)
-            
     @abstractmethod
     def torus(self):
         print('Torus not implemented')
@@ -56,67 +49,63 @@ class Actuation():
     def controller(self):
         print('Controller not implemented')
 
-    def stepForward(self, velocity):
+    def step_forward(self, velocity):
         """
         One step forward.
         """
-
         # calculate the position from the direction and speed and update body position
-        robot_position_x, robot_position_y, robot_heading = self.agent.get_position()
+        x, y, heading = self.agent.get_position()
 
-        direction_x = math.sin(math.radians(robot_heading))
-        direction_y = math.cos(math.radians(robot_heading))
+        direction_x = math.sin(math.radians(heading))
+        direction_y = math.cos(math.radians(heading))
 
-        new_position_x = float(robot_position_x + direction_x * velocity)
-        new_position_y = float(robot_position_y + direction_y * velocity)
+        new_x = float(x + direction_x * velocity)
+        new_y = float(y + direction_y * velocity)
 
-        self.agent.set_position(new_position_x, new_position_y, robot_heading)
+        self.agent.set_position(new_x, new_y, heading)
 
-    def stepBackward(self,velocity):
+    def step_backward(self, velocity):
         """
         One step backward.
         """
-        robot_position_x, robot_position_y, robot_heading = self.agent.get_position()
+        x, y, heading = self.agent.get_position()
 
-        direction_x = math.sin(math.radians(robot_heading))
-        direction_y = math.cos(math.radians(robot_heading))
-        new_position_x = robot_position_x - direction_x * velocity
-        new_position_y = robot_position_y - direction_y * velocity
+        direction_x = math.sin(math.radians(heading))
+        direction_y = math.cos(math.radians(heading))
 
-        self.agent.set_position(new_position_x, new_position_y, robot_heading)
+        new_x = x - direction_x * velocity
+        new_y = y - direction_y * velocity
 
-    def turn_right(self, angle_velocity):
+        self.agent.set_position(new_x, new_y, heading)
 
-        robot_position_x, robot_position_y, robot_heading = self.agent.get_position()
-        new_angle = (robot_heading - angle_velocity) % 360
-        self.agent.set_position(robot_position_x, robot_position_y, new_angle)
+    def turn_right(self, angular_velocity):
+        x, y, heading = self.agent.get_position()
+        new_heading = (heading - angular_velocity) % 360
+        self.agent.set_position(x, y, new_heading)
 
-    def turn_left(self,angle_velocity):
-        # new angle
-        robot_position_x, robot_position_y, robot_heading = self.agent.get_position()
-        new_angle = (robot_heading + angle_velocity) % 360
-        self.agent.set_position(robot_position_x, robot_position_y, new_angle)
+    def turn_left(self, angular_velocity):
+        x, y, heading = self.agent.get_position()
+        new_heading = (heading + angular_velocity) % 360
+        self.agent.set_position(x, y, new_heading)
 
-#%% Helper functions
-        
-    def processUserInput(self, pressedKeys):
+    # =============================================================================
+    # Helper functions
+    # =============================================================================
+    def process_user_input(self, pressed_keys):
         """
         Process user keyboard input.
-        
+
         Args:
-            pressedKeys (Pygame Keyboard Codes)
-        
+            pressed_keys (Pygame Keyboard Codes)
         """
-        if pressedKeys[pygame.K_UP]:           
-            self.stepForward(self.config['default_velocity'])
-            
-        if pressedKeys[pygame.K_DOWN]:
-            self.stepBackward(self.config['default_velocity'])
-            
-        if pressedKeys[pygame.K_LEFT]:
-            # new angle
-            self.turn_left(self.config['default_angle_velocity'])
-            
-        if pressedKeys[pygame.K_RIGHT]:          
-            self.turn_right(self.config['default_angle_velocity'])
-            
+        if pressed_keys[pygame.K_UP]:
+            self.step_forward(self.config['default_velocity'])
+
+        if pressed_keys[pygame.K_DOWN]:
+            self.step_backward(self.config['default_velocity'])
+
+        if pressed_keys[pygame.K_LEFT]:
+            self.turn_left(self.config['default_angular_velocity'])
+
+        if pressed_keys[pygame.K_RIGHT]:
+            self.turn_right(self.config['default_angular_velocity'])

@@ -1,59 +1,41 @@
 import random
 
 from swarmy.actuation import Actuation
-import yaml
+
 
 class MyController(Actuation):
 
-    def __init__(self, agent,config):
-        super().__init__(agent)
-        """
-        self.linear_velocity = <your value> # set the linear velocity of the robot
-        self.angle_velocity =  <your value> # set the angular velocity of the robot
-        """
-        self.config = config
-        self.init_pos = True            # flag to set initial position of the robot
-
-
-
+    def __init__(self, agent, config):
+        super().__init__(agent, config)
+        # self.linear_velocity = <your value>   # set the linear velocity of the robot
+        # self.angular_velocity = <your value>  # set the angular velocity of the robot
 
     def controller(self):
         """
         This function overwrites the abstract method of the robot controller.
-        these function might help:
-        - self.stepBackward(velocity)
-        - self.turn_right(angle_velocity)
-        - self.turn_left(angle_velocity)
-        - x,y,gamme = self.agent.get_position() # returns the current position and heading of the robot.
-        - self.agent.set_position(new_position_x, new_position_y, robot_heading) # set the new position of the robot
-        - self.agent.get_perception() returns the ID of the robot and sensor values that you implemented in sensor() of the class MySensor()
-        Returns:
+        These functions might help:
+        - self.step_forward(velocity)
+        - self.step_backward(velocity)
+        - self.turn_right(angular_velocity)
+        - self.turn_left(angular_velocity)
+        - x, y, heading = self.agent.get_position() # returns the current position and heading of the robot
+        - self.agent.set_position(new_x, new_y, heading) # set the new position of the robot
+        - self.agent.get_perception() # returns the ID of the robot followed by the values of each sensor's sensor()
         """
-
-        #Set initial robot position and direction
-        if self.init_pos:
-            self.agent.initial_position()
-            self.init_pos = False
-
         # example controller
         sensor = self.agent.get_perception()
         if sensor[1] == 1:
-            self.stepForward(0) # move backwards
+            self.step_forward(0)  # stop
         else:
-            self.stepForward(1) # move forward with random velocity
-            # self.turn_right(2 * random.randint(-4, 4)) # turn right or left with random angle velocity
+            self.step_forward(1)  # move forward
+            # self.turn_right(2 * random.randint(-4, 4))  # turn right or left with random angular velocity
 
     def torus(self):
         """
         Implement torus world by manipulating the robot position. Again self.agent.get_position and self.agent.set_position might be useful
         """
-        robot_position_x,robot_position_y, robot_heading = self.agent.get_position()
-
+        x, y, heading = self.agent.get_position()
 
         """ Implement torus world by manipulating the robot position, here."""
 
-
-        self.agent.set_position(robot_position_x, robot_position_y, robot_heading)
-
-
-
+        self.agent.set_position(x, y, heading)

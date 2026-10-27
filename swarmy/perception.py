@@ -6,49 +6,34 @@
 # =============================================================================
 """
 Description:
-This module includes all perception possibilites of an agent.
+This module is the base class for all sensors of an agent.
 """
 
 # =============================================================================
 # Imports
 # =============================================================================
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 
-import pygame
-import math
+
 # =============================================================================
 # Class
 # =============================================================================
-class Perception():
+class Perception(ABC):
     """
-    The perception object represents the all sensing capabilites of an agent.
-    All sensors will be defined here. 
-        
+    The perception object is the base class for a sensor of an agent.
+    Each sensor is a subclass that implements sensor().
+
     Args:
-        a (agent.py): instance of the agent    
-    
-    Available sensors:
-        Your light sensor
-    
+        agent (agent.py): instance of the agent
+        environment (environment.py): instance of the environment
     """
-    def __init__(self, a, e):
-        
+    def __init__(self, agent, environment):
         """
         Initialize perception object.
-        """    
-
-        # variables        
-        self.agent = a
-        self.env = e
-
+        """
+        self.agent = agent
+        self.environment = environment
 
     @abstractmethod
-    def Sensor(self):
+    def sensor(self):
         print('Sensor not implemented')
-
-
-
-
- 
-
-       

@@ -131,10 +131,7 @@ class Experiment():
 
         if self.config['save_trajectory']:
             for i, agent in enumerate(agent_list):
-                if i == len(agent_list) - 1:
-                    agent.save_information(True)
-                else:
-                    agent.save_information(False)
+                agent.save_information(save_image=(i == len(agent_list) - 1))
 
         print('Experiment finished by manual stopping or maximum timesteps reached. Check config.yaml to increase the maximum timesteps.')
         pygame.quit()

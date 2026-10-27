@@ -9,10 +9,10 @@ world_height: 500
 background_color: !!python/tuple [255, 255, 255]
 
 ## Robot parameters
-number_of_agents: 4
+number_of_agents: 500
 default_velocity: 2.5
 default_angular_velocity: 2
-save_trajectory: 0
+save_trajectory: 1
 
 ## Controller ratios: share of the swarm for each controller in the controllers list in workspace.py (same order)
 # Example: If there are 6 robots and the first three robots use controllers[0] and the last three robots use controllers[1]:

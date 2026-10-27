@@ -61,10 +61,10 @@ class Agent(ABC):
         print('initial position not implemented')
 
     @abstractmethod
-    def save_information(self, last_robot):
+    def save_information(self, save_image):
         """
         Save information of the agent, e.g. trajectory or the environmental plot.
-        last_robot is True for the last agent, e.g. to save a shared image once.
+        save_image is True only for the last agent, so the shared image is saved once after all agents have drawn on it.
         """
         print('save information not implemented')
 
